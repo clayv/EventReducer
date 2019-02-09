@@ -4,6 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using CVV;
 
+class ConsoleAppArgs : ReducedEventArgs
+{
+    public int Argument { get; set; }
+}
+
 class Program
 {
     const int ATTEMPTED_CALLS = 1000000;
@@ -11,20 +16,19 @@ class Program
     {
         Task[] tasks = new Task[ATTEMPTED_CALLS];
         Random rnd = new Random();
-        EventHandler<Tests.MyEventArgs> m_EventHandler = null;
+        EventHandler<ConsoleAppArgs> m_EventHandler = null;
 
-        using (var freqEvent = new EventReducer<Tests.MyEventArgs>(Tests.Tests.CalculatePrimes))
+        using (var freqEvent = new EventReducer<ConsoleAppArgs>((o, eventArgs) =>
+        {
+            Console.WriteLine($"Handled event request: {(int)o}\t with argument {eventArgs.Argument}");
+            Thread.Sleep(500);
+        }))
         {
             m_EventHandler += freqEvent.Handler;
-            for (int attemptedCalls = 0; attemptedCalls < ATTEMPTED_CALLS; attemptedCalls++)
+            for (int attemptedCalls = 1; attemptedCalls <= ATTEMPTED_CALLS; attemptedCalls++)
             {
-                int max = rnd.Next(50000);
-                //if (attemptedCalls == ATTEMPTED_CALLS >> 1)
-                //{
-                //    Console.WriteLine("Cancelling");
-                //    freqEvent.Cancel();
-                //}
-                tasks[attemptedCalls] = Task.Run(() => m_EventHandler(null, new Tests.MyEventArgs() { Maximum = max }));
+                int request = attemptedCalls;
+                tasks[attemptedCalls - 1] = Task.Run(() => m_EventHandler(request, new ConsoleAppArgs() { Argument = request }));
             }
             Task.WaitAll(tasks);
             Console.WriteLine("\nCompleted");

@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EventReducer\EventReducer.csproj" />
-    <ProjectReference Include="..\NUnit Tests\NUnit Tests.csproj" />
   </ItemGroup>
 
 </Project>
