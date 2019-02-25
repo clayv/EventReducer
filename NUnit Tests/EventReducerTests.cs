@@ -8,7 +8,7 @@ namespace Tests
 {
     public class MyEventArgs : ReducedEventArgs
     {
-        public int Maximum { set; get; }
+        public int Maximum { get; set; }
     }
 
     [TestFixture]
@@ -129,14 +129,15 @@ namespace Tests
             {
                 // No calculations are occuring here so I'm willing 
                 // for this to be a little off, hence the multiplier.
-                // But even with the multiplier it can still fail sometime.
+                // But even with the multiplier it can still fail.
                 Assert.LessOrEqual((int)o * 0.999, args.Maximum);
             }))
             {
                 eventHandler += freqEvent.Handler;
                 for (int attemptedCalls = 0; attemptedCalls < ATTEMPTED_CALLS; attemptedCalls++)
                 {
-                    tasks[attemptedCalls] = Task.Run(() => eventHandler(attemptedCalls, new MyEventArgs() { Maximum = attemptedCalls }));
+                    int request = attemptedCalls;
+                    tasks[attemptedCalls] = Task.Run(() => eventHandler(request, new MyEventArgs() { Maximum = request }));
                 }
                 Task.WaitAll(tasks);
             }
